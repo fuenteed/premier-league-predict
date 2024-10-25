@@ -1,0 +1,55 @@
+<!-- results.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Match Results</title>
+    <style>
+        .match-card {
+            border: 1px solid #ddd;
+            margin: 20px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .score {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .probabilities {
+            margin-top: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Match Results</h1>
+    
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if matches %}
+        {% for match in matches %}
+            <div class="match-card">
+                <div class="date">{{ match.date }}</div>
+                <div class="score">
+                    {{ match.home_team }} {{ match.home_goals }} - {{ match.away_goals }} {{ match.away_team }}
+                </div>
+                <div class="probabilities">
+                    Model Predictions:<br>
+                    Home Win: {{ match.probabilities.home_win }} |
+                    Draw: {{ match.probabilities.tie }} |
+                    Away Win: {{ match.probabilities.away_win }}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No matches found for the selected date range.</p>
+    {% endif %}
+    
+    <p><a href="/">Back to Search</a></p>
+</body>
+</html>

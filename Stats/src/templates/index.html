@@ -1,0 +1,21 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Match Predictor</title>
+</head>
+<body>
+    <h1>Match Predictor</h1>
+    <form action="/results" method="post">
+        <p>Available date range: {{ min_date }} to {{ max_date }}</p>
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" min="{{ min_date }}" max="{{ max_date }}" required><br><br>
+        
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" min="{{ min_date }}" max="{{ max_date }}" required><br><br>
+        
+        <input type="submit" value="Show Matches">
+    </form>
+</body>
+</html>
+
