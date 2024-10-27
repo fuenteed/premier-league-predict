@@ -8,7 +8,9 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 # Load pre-trained model and scaler
-model = joblib.load('models/logistic_regression_model.pkl')
+Logistic = joblib.load('models/Logistic_model.pkl')
+Forest = joblib.load('models/random_forest_model.pkl')
+XGBoost = joblib.load('models/xgboost_model.pkl')
 scaler = joblib.load('models/scaler.pkl')
 
 # Define the exact feature names used during training
@@ -20,6 +22,12 @@ FEATURE_NAMES = [
     'home_team_possession', 'away_team_possession',
     'team_a_xg', 'team_b_xg'
 ]
+
+models = {
+    'Logistic': None,
+    'Forest': None,
+    'XGBoost': None
+}
 
 @app.route('/')
 def index():
@@ -33,6 +41,16 @@ def index():
 @app.route('/results', methods=['POST'])
 def results():
     try:
+        #get the model of choice from the user
+        choice_model = request.form.get('model')
+
+        if(choice_model == 'Logistic'):
+            model = Logistic
+        elif(choice_model == 'Forest'):
+            model = Forest
+        elif(choice_model == 'XGBoost'):
+            model = XGBoost
+
         # Load CSV data
         data = pd.read_csv('data/matches_agg.csv')
         
@@ -88,6 +106,11 @@ def results():
                 # Scale features
                 features_scaled = scaler.transform(features)
 
+                #predict the result, result should be either 0 or 1 or 2
+                result = model.predict(features_scaled)
+
+                print(f"Predicted result: {result[0]}")
+                
                 # Predict probabilities
                 probabilities = model.predict_proba(features_scaled)
 
@@ -97,6 +120,7 @@ def results():
                     'away_team': row['away_team_name'],
                     'home_goals': int(row['home_team_goal_count']),
                     'away_goals': int(row['away_team_goal_count']),
+                    'result': result[0],
                     'probabilities': {
                         'home_win': f"{probabilities[0][2]*100:.1f}%",
                         'tie': f"{probabilities[0][1]*100:.1f}%",
@@ -107,7 +131,8 @@ def results():
                 print(f"Error processing match: {str(e)}")
                 continue
 
-        return render_template('results.html', matches=match_results)
+        #return the results and whether the model predicted 0 or 1 or 2
+        return render_template('results.html', matches=match_results, model = choice_model)
 
     except Exception as e:
         print(f"Error processing request: {str(e)}")

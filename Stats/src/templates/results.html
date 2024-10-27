@@ -23,6 +23,7 @@
 <body>
     <h1>Match Results</h1>
     
+    <span> Using Model: {{ model }}</span>
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for message in messages %}
@@ -43,6 +44,26 @@
                     Home Win: {{ match.probabilities.home_win }} |
                     Draw: {{ match.probabilities.tie }} |
                     Away Win: {{ match.probabilities.away_win }}
+                </div>
+                <div>
+                    <p>
+                        The Model Predicted {{ match.result }}
+                        {% if match.result == 0 %}
+                        <div>
+                            Home Win
+                        </div>
+                            
+                        {% elif match.result == 1 %}
+                        <div>
+                            Away Win
+                        </div>
+                        {% else %}  
+                        <div>
+                            Draw
+                        </div>
+                        {% endif %}
+
+                    </p>
                 </div>
             </div>
         {% endfor %}

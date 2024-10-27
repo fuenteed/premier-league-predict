@@ -13,6 +13,18 @@
         
         <label for="end_date">End Date:</label>
         <input type="date" id="end_date" name="end_date" min="{{ min_date }}" max="{{ max_date }}" required><br><br>
+
+        <!--
+            Toggle between Logistic Model, Random Forest Model, and XGBoost Model
+        -->
+        <label for="model">Model:</label>
+        <select id="model" name="model">
+            <option value="Logistic">Logistic</option>
+            <option value="Forest">Random Forest</option>
+            <option value="XGBoost">XGBoost</option>
+        </select><br><br>
+
+        
         
         <input type="submit" value="Show Matches">
     </form>
