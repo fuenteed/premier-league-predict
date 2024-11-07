@@ -1,69 +1,75 @@
-<!-- results.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Match Results</title>
-    <style>
-        .match-card {
-            border: 1px solid #ddd;
-            margin: 20px;
-            padding: 15px;
-            border-radius: 5px;
-        }
-        .score {
-            font-size: 1.2em;
-            font-weight: bold;
-        }
-        .probabilities {
-            margin-top: 10px;
-            color: #666;
-        }
-    </style>
-</head>
-<body>
+<div class="container">
     <h1>Match Results</h1>
     
-    <span> Using Model: {{ model }}</span>
+    <h2>Data Visualizations</h2>
+    <div class="visualization-grid">
+        <div class="viz-card">
+            <h3>Match Outcome Distribution</h3>
+            <img height="50" width="50" src= "static/plots/outcome_distribution.png" alt="Match Outcome Distribution">
+        </div>
+        
+        <div class="viz-card">
+            <h3>Feature Correlation Heatmap</h3>
+            <img height="50" width="50" src="{{ url_for('static', filename='plots/correlation_heatmap.png') }}" alt="Feature Correlation Heatmap">
+        </div>
+        
+        <div class="viz-card">
+            <h3>Feature Distributions</h3>
+            <img height="50" width="50" src="{{ url_for('static', filename='plots/feature_distributions.png') }}" alt="Feature Distributions">
+        </div>
+        
+        <div class="viz-card">
+            <h3>Key Features vs Match Result</h3>
+            <img height="50" width="50" src="{{ url_for('static', filename='plots/feature_vs_result.png') }}" alt="Features vs Result">
+        </div>
+    </div>
+
+    <h2>Match Predictions</h2>
+    
+    <p>Using Model: {{ model }}</p>
+    
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for message in messages %}
-                <div class="alert">{{ message }}</div>
+                <div class="alert">
+                    {{ message }}
+                </div>
             {% endfor %}
         {% endif %}
     {% endwith %}
-
+    
     {% if matches %}
         {% for match in matches %}
             <div class="match-card">
                 <div class="date">{{ match.date }}</div>
+                
                 <div class="score">
                     {{ match.home_team }} {{ match.home_goals }} - {{ match.away_goals }} {{ match.away_team }}
                 </div>
+                
                 <div class="probabilities">
-                    Model Predictions:<br>
-                    Home Win: {{ match.probabilities.home_win }} |
-                    Draw: {{ match.probabilities.tie }} |
-                    Away Win: {{ match.probabilities.away_win }}
+                    <div class="prob-bar">
+                        <div class="prob-segment home" style="width: {{ match.probabilities.home_win }}%">
+                            Home Win: {{ match.probabilities.home_win }}%
+                        </div>
+                        <div class="prob-segment draw" style="width: {{ match.probabilities.tie }}%">
+                            Draw: {{ match.probabilities.tie }}%
+                        </div>
+                        <div class="prob-segment away" style="width: {{ match.probabilities.away_win }}%">
+                            Away Win: {{ match.probabilities.away_win }}%
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <p>
-                        The Model Predicted {{ match.result }}
-                        {% if match.result == 0 %}
-                        <div>
-                            Home Win
-                        </div>
-                            
-                        {% elif match.result == 1 %}
-                        <div>
-                            Away Win
-                        </div>
-                        {% else %}  
-                        <div>
-                            Draw
-                        </div>
-                        {% endif %}
-
-                    </p>
+                
+                <div class="result">
+                    Prediction: 
+                    {% if match.result == 0 %}
+                        Home Win
+                    {% elif match.result == 1 %}
+                        Away Win
+                    {% else %}
+                        Draw
+                    {% endif %}
                 </div>
             </div>
         {% endfor %}
@@ -71,6 +77,5 @@
         <p>No matches found for the selected date range.</p>
     {% endif %}
     
-    <p><a href="/">Back to Search</a></p>
-</body>
-</html>
+    <a href="/" class="back-link">Back to Search</a>
+</div>

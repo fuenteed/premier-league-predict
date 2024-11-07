@@ -1,21 +1,30 @@
-from flask import Flask, render_template, request, flash
+from flask import Flask, render_template, request, flash, send_from_directory
 import pandas as pd
-import joblib
-import numpy as np
+import pickle
 import os
+from model import MatchModel
+from datetime import datetime
+import logging
+import matplotlib
+import numpy as np
+matplotlib.use('Agg')
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+app.secret_key = 'supersecretkey'
 
-# Load pre-trained model and scaler
-Logistic = joblib.load('models/Logistic_model.pkl')
-Forest = joblib.load('models/random_forest_model.pkl')
-XGBoost = joblib.load('models/xgboost_model.pkl')
-scaler = joblib.load('models/scaler.pkl')
+
+models = {
+    'forest': 'Forest',
+    'bayes': 'Bayes'
+}
 
 # Define the exact feature names used during training
 FEATURE_NAMES = [
-    'home_ppg', 'away_ppg', 
+    'home_team_code', 'away_team_code',
     'home_team_corner_count', 'away_team_corner_count',
     'home_team_shots', 'away_team_shots', 
     'home_team_shots_on_target', 'away_team_shots_on_target', 
@@ -23,33 +32,44 @@ FEATURE_NAMES = [
     'team_a_xg', 'team_b_xg'
 ]
 
-models = {
-    'Logistic': None,
-    'Forest': None,
-    'XGBoost': None
-}
 
 @app.route('/')
 def index():
-    # Load CSV data to get available date range
+
+    # Load data
     data = pd.read_csv('data/matches_agg.csv')
-    data['date_GMT'] = pd.to_datetime(data['date_GMT'], errors='coerce')
-    min_date = data['date_GMT'].min().strftime('%Y-%m-%d')
-    max_date = data['date_GMT'].max().strftime('%Y-%m-%d')
-    return render_template('index.html', min_date=min_date, max_date=max_date)
+
+    """Render the main page"""
+    try:
+        if data is None:
+            flash("Error: Dataset not available")
+            return render_template('index.html', min_date=None, max_date=None)
+            
+        min_date = data['date_GMT'].min()
+        max_date = data['date_GMT'].max()
+        
+        return render_template('index.html', 
+                             min_date=min_date.strftime('%Y-%m-%d'),
+                             max_date=max_date.strftime('%Y-%m-%d'))
+                             
+    except Exception as e:
+        logger.error(f"Error in index route: {e}")
+        flash("An error occurred while loading the page")
+        return render_template('index.html', min_date=None, max_date=None)
+
 
 @app.route('/results', methods=['POST'])
 def results():
+    """Process prediction request and show results"""
     try:
-        #get the model of choice from the user
-        choice_model = request.form.get('model')
+        #get model choice from user
+        model_name = request.form.get('model')
 
-        if(choice_model == 'Logistic'):
-            model = Logistic
-        elif(choice_model == 'Forest'):
-            model = Forest
-        elif(choice_model == 'XGBoost'):
-            model = XGBoost
+        # set model of choice to forest or bayes
+        if(model_name == 'forest'):
+            model_choice = 'forest'
+        elif(model_name == 'bayes'):
+            model_choice = 'bayes'
 
         # Load CSV data
         data = pd.read_csv('data/matches_agg.csv')
@@ -86,7 +106,7 @@ def results():
             return render_template('results.html', matches=[])
 
         print(f"Found {len(filtered_df)} matches in the selected date range")
-
+        
         match_results = []
         for index, row in filtered_df.iterrows():
             try:
@@ -103,16 +123,14 @@ def results():
                 print(f"Features shape: {features.shape}")
                 print(f"Feature names: {FEATURE_NAMES}")
                 
-                # Scale features
-                features_scaled = scaler.transform(features)
+
 
                 #predict the result, result should be either 0 or 1 or 2
-                result = model.predict(features_scaled)
+                result = model_choice.predict(features)
 
-                print(f"Predicted result: {result[0]}")
                 
                 # Predict probabilities
-                probabilities = model.predict_proba(features_scaled)
+                probabilities = model_choice.predict_proba(features)
 
                 match_results.append({
                     'date': row['date_GMT'].strftime('%Y-%m-%d'),
@@ -132,7 +150,7 @@ def results():
                 continue
 
         #return the results and whether the model predicted 0 or 1 or 2
-        return render_template('results.html', matches=match_results, model = choice_model)
+        return render_template('results.html', matches=match_results, model = model_choice)
 
     except Exception as e:
         print(f"Error processing request: {str(e)}")

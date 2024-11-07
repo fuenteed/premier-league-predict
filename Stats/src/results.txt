@@ -1,0 +1,58 @@
+Data split information:
+Training data: 2064 samples (matches before 2023-01-01)
+Testing data: 596 samples (matches from 2023-01-01 onwards)
+
+Class distribution in training set:
+target
+0    0.442829
+1    0.331395
+2    0.225775
+Name: proportion, dtype: float64
+
+Class distribution in test set:
+target
+0    0.466443
+1    0.305369
+2    0.228188
+Name: proportion, dtype: float64
+
+Training the forest model...
+
+Training the naive bayes model...
+
+Accuracy of Random Forest Model:  0.41946308724832215
+predicted    0   1  2
+actual               
+0          219  51  8
+1          147  27  8
+2          113  19  4
+
+Accuracy of Naive Bayes Model:  0.436241610738255
+predicted    0   1  2
+actual               
+0          241  34  3
+1          164  18  0
+2          112  23  1
+
+Classification Report of Random Forest Model: 
+               precision    recall  f1-score   support
+
+           0       0.46      0.79      0.58       278
+           1       0.28      0.15      0.19       182
+           2       0.20      0.03      0.05       136
+
+    accuracy                           0.42       596
+   macro avg       0.31      0.32      0.27       596
+weighted avg       0.34      0.42      0.34       596
+
+
+Classification Report of Naive Bayes Model: 
+               precision    recall  f1-score   support
+
+           0       0.47      0.87      0.61       278
+           1       0.24      0.10      0.14       182
+           2       0.25      0.01      0.01       136
+
+    accuracy                           0.44       596
+   macro avg       0.32      0.32      0.25       596
+weighted avg       0.35      0.44      0.33       596

@@ -1,0 +1,13 @@
+Model: Bayes
+Overall Accuracy: 0.5503
+
+Detailed Classification Report:
+              precision    recall  f1-score   support
+
+    Home Win       0.62      0.75      0.68       282
+    Away Win       0.49      0.60      0.54       182
+        Draw       0.23      0.05      0.09       132
+
+    accuracy                           0.55       596
+   macro avg       0.45      0.47      0.43       596
+weighted avg       0.49      0.55      0.50       596
